@@ -1,0 +1,20 @@
+version: '3.8'
+services:
+    post-service:
+        build:
+            context: .
+            dockerfile: Dockerfile
+        ports:
+            - 8000:8000
+        volumes:
+            - .:/app
+        command: 'php artisan serve --host=0.0.0.0'
+        networks:
+            - kafka_network
+        environment:
+            - BOOTSTRAP_SERVERS=PLAINTEXT=//kafka:29092
+
+networks:
+    kafka_network:
+        driver: bridge
+
