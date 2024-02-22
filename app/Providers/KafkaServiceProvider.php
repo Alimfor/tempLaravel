@@ -2,6 +2,7 @@
 
 namespace App\Providers;
 
+use App\Kafka\KafkaConnector;
 use App\Kafka\PostProducer;
 use Illuminate\Support\ServiceProvider;
 
@@ -12,9 +13,7 @@ class KafkaServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        $this->app->singleton(PostProducer::class, function () {
-            return new PostProducer();
-        });
+
     }
 
     /**
@@ -22,6 +21,9 @@ class KafkaServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        //
+        $manager = $this->app['queue'];
+        $manager->addConnector('kafka', function () {
+            return new KafkaConnector();
+        });
     }
 }

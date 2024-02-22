@@ -5,8 +5,8 @@ namespace App\Http\Controllers\api;
 use App\Dto\PostEventPayloadDTO;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\PostRequest;
+use App\Jobs\PostCreated;
 use App\Kafka\PostEventType;
-use App\Kafka\PostProducer;
 use App\Models\Post;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
@@ -30,7 +30,7 @@ function convertTo(Post $post, PostEventType $type): PostEventPayloadDTO
 
 class PostController extends Controller
 {
-    public function store(PostRequest $request, PostProducer $producer): JsonResponse
+    public function store(PostRequest $request): JsonResponse
     {
 
         $userData = 'alimzhan';// TODO-> here should be retrieving user data from JWT
@@ -53,7 +53,7 @@ class PostController extends Controller
 
         Redis::lPush($post_key, json_encode($post));
 
-        $producer->produce(convertTo($post, PostEventType::CREATED));
+        PostCreated::dispatch(convertTo($post, PostEventType::CREATED))->onQueue('post-changed-event');
 
         return response()->json($post);
     }
